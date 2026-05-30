@@ -1354,6 +1354,7 @@ func (d *Daemon) handleModelList(ctx context.Context, rt Runtime, requestID stri
 			Default:  m.Default,
 		})
 	}
+	d.logger.Info("model list retrieved", "runtime_id", rt.ID, "request_id", requestID, "provider", rt.Provider, "models", wire)
 	d.reportModelListResult(ctx, rt, requestID, map[string]any{
 		"status":    "completed",
 		"models":    wire,

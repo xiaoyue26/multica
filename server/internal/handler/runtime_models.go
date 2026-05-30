@@ -365,6 +365,6 @@ func (h *Handler) ReportModelListResult(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	slog.Debug("model list report", "runtime_id", runtimeID, "request_id", requestID, "status", body.Status, "count", len(body.Models))
+	slog.Info("model list report", "runtime_id", runtimeID, "request_id", requestID, "status", body.Status, "models", body.Models)
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
