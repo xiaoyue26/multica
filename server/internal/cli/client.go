@@ -8,6 +8,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -446,15 +447,24 @@ func (c *APIClient) UploadFileWithURL(ctx context.Context, fileData []byte, file
 // The URL may be absolute (a signed CloudFront/S3 URL) or relative
 // (a server-relative path like "/uploads/...") depending on how the
 // server is configured. Relative URLs are resolved against the client's
-// BaseURL and sent with the standard auth headers; absolute URLs are
-// used as-is so that their query-string signatures are not disturbed.
+// BaseURL using url.ResolveReference so that sub-path prefixes in BaseURL
+// (e.g. "/app/") are handled correctly; absolute URLs are used as-is so
+// that their query-string signatures are not disturbed.
 func (c *APIClient) DownloadFile(ctx context.Context, downloadURL string) ([]byte, error) {
 	isRelative := !strings.HasPrefix(downloadURL, "http://") && !strings.HasPrefix(downloadURL, "https://")
 	if isRelative {
 		if c.BaseURL == "" {
 			return nil, fmt.Errorf("download URL %q is relative but client has no BaseURL", downloadURL)
 		}
-		downloadURL = c.BaseURL + downloadURL
+		base, err := url.Parse(c.BaseURL)
+		if err != nil {
+			return nil, fmt.Errorf("parse BaseURL %q: %w", c.BaseURL, err)
+		}
+		ref, err := url.Parse(downloadURL)
+		if err != nil {
+			return nil, fmt.Errorf("parse download URL %q: %w", downloadURL, err)
+		}
+		downloadURL = base.ResolveReference(ref).String()
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)

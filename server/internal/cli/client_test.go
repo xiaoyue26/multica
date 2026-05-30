@@ -233,6 +233,60 @@ func TestDownloadFile(t *testing.T) {
 			t.Fatal("expected error, got nil")
 		}
 	})
+
+	t.Run("sub-path BaseURL: relative download path resolves correctly", func(t *testing.T) {
+		var gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotPath = r.URL.Path
+			w.Write([]byte("data"))
+		}))
+		defer srv.Close()
+
+		client := NewAPIClient(srv.URL+"/app", "", "test-token")
+		_, err := client.DownloadFile(context.Background(), "/uploads/file.md")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if gotPath != "/uploads/file.md" {
+			t.Errorf("expected path /uploads/file.md, got %q", gotPath)
+		}
+	})
+
+	t.Run("sub-path BaseURL with trailing slash: relative download path resolves correctly", func(t *testing.T) {
+		var gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotPath = r.URL.Path
+			w.Write([]byte("data"))
+		}))
+		defer srv.Close()
+
+		client := NewAPIClient(srv.URL+"/app/", "", "test-token")
+		_, err := client.DownloadFile(context.Background(), "/uploads/file.md")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if gotPath != "/uploads/file.md" {
+			t.Errorf("expected path /uploads/file.md, got %q", gotPath)
+		}
+	})
+
+	t.Run("root BaseURL with trailing slash: relative download path resolves correctly", func(t *testing.T) {
+		var gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotPath = r.URL.Path
+			w.Write([]byte("data"))
+		}))
+		defer srv.Close()
+
+		client := NewAPIClient(srv.URL+"/", "", "test-token")
+		_, err := client.DownloadFile(context.Background(), "/uploads/file.md")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if gotPath != "/uploads/file.md" {
+			t.Errorf("expected path /uploads/file.md, got %q", gotPath)
+		}
+	})
 }
 
 func TestUploadFileWithURL(t *testing.T) {
