@@ -69,7 +69,7 @@ func (h *Handler) attachmentToResponse(a db.Attachment) AttachmentResponse {
 		SizeBytes:    a.SizeBytes,
 		CreatedAt:    a.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
 	}
-	if h.CFSigner != nil {
+	if h.CFSigner != nil && (strings.HasPrefix(a.Url, "http://") || strings.HasPrefix(a.Url, "https://")) {
 		resp.DownloadURL = h.CFSigner.SignedURL(a.Url, time.Now().Add(30*time.Minute))
 	}
 	if a.IssueID.Valid {
