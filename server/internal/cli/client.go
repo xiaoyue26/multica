@@ -454,7 +454,11 @@ func (c *APIClient) DownloadFile(ctx context.Context, downloadURL string) ([]byt
 		if c.BaseURL == "" {
 			return nil, fmt.Errorf("download URL %q is relative but client has no BaseURL", downloadURL)
 		}
-		downloadURL = c.BaseURL + downloadURL
+		base := strings.TrimRight(c.BaseURL, "/")
+		if !strings.HasPrefix(downloadURL, "/") {
+			downloadURL = "/" + downloadURL
+		}
+		downloadURL = base + downloadURL
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
