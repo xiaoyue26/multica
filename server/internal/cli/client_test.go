@@ -247,8 +247,8 @@ func TestDownloadFile(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if gotPath != "/uploads/file.md" {
-			t.Errorf("expected path /uploads/file.md, got %q", gotPath)
+		if gotPath != "/app/uploads/file.md" {
+			t.Errorf("expected path /app/uploads/file.md, got %q", gotPath)
 		}
 	})
 
@@ -265,8 +265,8 @@ func TestDownloadFile(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if gotPath != "/uploads/file.md" {
-			t.Errorf("expected path /uploads/file.md, got %q", gotPath)
+		if gotPath != "/app/uploads/file.md" {
+			t.Errorf("expected path /app/uploads/file.md, got %q", gotPath)
 		}
 	})
 
@@ -285,6 +285,24 @@ func TestDownloadFile(t *testing.T) {
 		}
 		if gotPath != "/uploads/file.md" {
 			t.Errorf("expected path /uploads/file.md, got %q", gotPath)
+		}
+	})
+
+	t.Run("sub-path BaseURL: relative download path without leading slash resolves correctly", func(t *testing.T) {
+		var gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotPath = r.URL.Path
+			w.Write([]byte("data"))
+		}))
+		defer srv.Close()
+
+		client := NewAPIClient(srv.URL+"/app", "", "test-token")
+		_, err := client.DownloadFile(context.Background(), "uploads/file.md")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if gotPath != "/app/uploads/file.md" {
+			t.Errorf("expected path /app/uploads/file.md, got %q", gotPath)
 		}
 	})
 }

@@ -8,7 +8,6 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"net/url"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -456,15 +455,11 @@ func (c *APIClient) DownloadFile(ctx context.Context, downloadURL string) ([]byt
 		if c.BaseURL == "" {
 			return nil, fmt.Errorf("download URL %q is relative but client has no BaseURL", downloadURL)
 		}
-		base, err := url.Parse(c.BaseURL)
-		if err != nil {
-			return nil, fmt.Errorf("parse BaseURL %q: %w", c.BaseURL, err)
+		base := strings.TrimRight(c.BaseURL, "/")
+		if !strings.HasPrefix(downloadURL, "/") {
+			downloadURL = "/" + downloadURL
 		}
-		ref, err := url.Parse(downloadURL)
-		if err != nil {
-			return nil, fmt.Errorf("parse download URL %q: %w", downloadURL, err)
-		}
-		downloadURL = base.ResolveReference(ref).String()
+		downloadURL = base + downloadURL
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
