@@ -9,6 +9,7 @@ import {
   type RuntimeHealth,
 } from "@multica/core/runtimes";
 import { agentListOptions, memberListOptions } from "@multica/core/workspace/queries";
+import { resolvePublicFileUrl } from "@multica/core/workspace/avatar-url";
 import { runtimeListOptions } from "@multica/core/runtimes/queries";
 import { useWorkspacePaths } from "@multica/core/paths";
 import { ActorAvatar as ActorAvatarBase } from "@multica/ui/components/common/actor-avatar";
@@ -56,6 +57,7 @@ export function AgentProfileCard({ agentId }: AgentProfileCardProps) {
     : null;
   const runtime = runtimes.find((r) => r.id === agent.runtime_id) ?? null;
   const isArchived = !!agent.archived_at;
+  const explicitModel = agent.model.trim();
   const initials = agent.name
     .split(" ")
     .map((w) => w[0])
@@ -76,7 +78,7 @@ export function AgentProfileCard({ agentId }: AgentProfileCardProps) {
         <ActorAvatarBase
           name={agent.name}
           initials={initials}
-          avatarUrl={agent.avatar_url}
+          avatarUrl={resolvePublicFileUrl(agent.avatar_url)}
           isAgent
           size={40}
           className="rounded-md"
@@ -117,6 +119,7 @@ export function AgentProfileCard({ agentId }: AgentProfileCardProps) {
           omitted — power-user detail lives on the detail page. */}
       <div className="flex flex-col gap-1.5 text-xs">
         <RuntimeRow agent={agent} runtime={runtime} />
+        {explicitModel && <MetaRow label={t(($) => $.inspector.prop_model)} value={explicitModel} mono />}
         {agent.skills.length > 0 && (
           <SkillsRow skills={agent.skills.map((s) => s.name)} />
         )}

@@ -51,6 +51,12 @@ export function useActorName() {
     return null;
   }, [agents, members, squads]);
 
+  const getAgentModel = useCallback((agentId: string): string | null => {
+    const a = agents.find((a) => a.id === agentId);
+    const model = a?.model?.trim();
+    return model ? model : null;
+  }, [agents]);
+
   return useMemo(
     () => ({
       getMemberName,
@@ -59,6 +65,7 @@ export function useActorName() {
       getActorName,
       getActorInitials,
       getActorAvatarUrl,
+      getAgentModel,
     }),
     [
       getActorAvatarUrl,
@@ -67,6 +74,7 @@ export function useActorName() {
       getAgentName,
       getMemberName,
       getSquadName,
+      getAgentModel,
     ],
   );
 }
